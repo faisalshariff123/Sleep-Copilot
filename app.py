@@ -22,7 +22,7 @@ def ask_claude():
     try:
         message = client.messages.create(
             model="claude-sonnet-4-5",
-            max_tokens=1000,
+            max_tokens=500,
             messages=[
                 {
                     "role": "user",
@@ -46,10 +46,10 @@ def ask_claude():
         }), 500
 
 
-@app.route("/dream_analysis", methods=['POST'])  # Changed to POST
+@app.route("/dream_analysis", methods=['POST'])  
 def dream_analysis():
-    data = request.json  # Get JSON data from request
-    dream_text = data.get('dream', '')  # Extract dream text
+    data = request.json  
+    dream_text = data.get('dream', '')  
     
     if not dream_text:
         return jsonify({
