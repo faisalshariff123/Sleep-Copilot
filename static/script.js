@@ -3,38 +3,25 @@ let movementLevels = [];
 let monitoring = false;
 
 function handleMotion(event) {
+  // Keep updating display even after monitoring stops
   let acc = event.accelerationIncludingGravity || {};
   let x = acc.x || 0, y = acc.y || 0, z = acc.z || 0;
   let magnitude = Math.sqrt(x*x + y*y + z*z);
   
+  // Only collect data while monitoring
   if (monitoring) {
     movementLevels.push(magnitude);
   }
   
-  // Only for test, not production. Remove or comment out in production.
   document.getElementById('output').textContent = `X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}, Z: ${z.toFixed(2)}, Magnitude: ${magnitude.toFixed(2)}`;
 }
+
 async function enableSensors() {
   noiseLevels = [];
   movementLevels = [];
   monitoring = true;
   
-  // Preload and unlock audio context on user interaction
-  let audio = document.getElementById('whitenoise');
-  audio.load(); // Preload the audio
-  
-  // Play and immediately pause to "unlock" audio on mobile
-  try {
-    audio.volume = 0;     // ← Mute it first
-    await audio.play();   // ← Plays silently (unlocks audio context)
-    audio.pause();
-    audio.currentTime = 0;
-    audio.volume = 1;     // ← Restore volume for later playback
-  } catch (err) {
-    console.log('Audio unlock attempt:', err);
-  }
-
-  // Motion sensor permission (iOS)
+  // REQUEST MOTION PERMISSION FIRST (before any other async operations!)
   if (typeof DeviceMotionEvent.requestPermission === 'function') {
     try {
       const resp = await DeviceMotionEvent.requestPermission();
@@ -42,14 +29,30 @@ async function enableSensors() {
         window.addEventListener('devicemotion', handleMotion);
       } else {
         alert('Motion sensor denied.');
+        monitoring = false;
         return;
       }
     } catch (err) { 
       alert('Motion error: ' + err); 
+      monitoring = false;
       return;
     }
   } else {
+    // PC, Mac and Non-iOS devices
     window.addEventListener('devicemotion', handleMotion);
+  }
+  
+  let audio = document.getElementById('whitenoise');
+  audio.load();
+  
+  try {
+    audio.volume = 0;
+    await audio.play();
+    audio.pause();
+    audio.currentTime = 0;
+    audio.volume = 1;
+  } catch (err) {
+    console.log('Audio unlock attempt:', err);
   }
   
   // Microphone access and noise analysis
@@ -70,31 +73,29 @@ async function enableSensors() {
       }
       let avg = sum / dataArray.length;
       noiseLevels.push(avg);
-    }, 1000); // every second
+    }, 1000);
     
-    alert('Microphone access granted! Monitoring for 5 seconds...');
+    alert('Sensors enabled! Monitoring for 5 seconds...');
   } catch (err) {
     alert('Microphone denied: ' + err);
     monitoring = false;
     return;
   }
   
-  // Timer for testing (5 seconds) - change back to 3600 * 1000 for production
+  // Timer for testing (5 seconds) (Not for production)
   setTimeout(() => {
     monitoring = false;
-// Check if we have any data
+    
     if (noiseLevels.length === 0 || movementLevels.length === 0) {
       alert('No data collected. Unable to determine sleep state.');
       return;
     }
     
-    // Analyze noise
     let avgNoise = noiseLevels.reduce((a, b) => a + b, 0) / noiseLevels.length;
-    let noiseAwake = avgNoise > 2; // Example threshold, tune as needed
+    let noiseAwake = avgNoise > 2;
     
-    // Analyze movement
     let avgMovement = movementLevels.reduce((a, b) => a + b, 0) / movementLevels.length;
-    let movementAwake = avgMovement > 10; // Example threshold, tune as needed
+    let movementAwake = avgMovement > 10;
     
     console.log(`Avg Noise: ${avgNoise.toFixed(2)}, Avg Movement: ${avgMovement.toFixed(2)}`);
     console.log(`Noise samples: ${noiseLevels.length}, Movement samples: ${movementLevels.length}`);
@@ -108,7 +109,7 @@ async function enableSensors() {
     } else {
       alert(`User is likely asleep.\nAvg Noise: ${avgNoise.toFixed(2)}, Avg Movement: ${avgMovement.toFixed(2)}`);
     }
-  }, 5 * 1000); // 5 seconds for testing
+  }, 5 * 1000);
 }
 
 document.getElementById('enable-sensors').addEventListener('click', enableSensors);
