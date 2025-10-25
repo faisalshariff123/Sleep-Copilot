@@ -129,3 +129,30 @@ async function submitDream() {
             const data = await response.json();
             document.getElementById('result').innerText = data.analysis;
         }
+
+// Sleep tips button
+async function getSleepTips() {
+
+    resultDiv.textContent = 'Getting personalized sleep tip...';
+    
+    try {
+        const response = await fetch('/sleep_tips', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})  
+        });
+        
+        const data = await response.json();
+        
+        // Check if successful and display the tip
+        if (data.success) {
+            resultDiv.textContent = '💡 ' + data.tips;
+        } else {
+            resultDiv.textContent = 'Error: ' + (data.error || 'Unknown error');
+        }
+    } catch (error) {
+        resultDiv.textContent = 'Error connecting to server: ' + error.message;
+    }
+}
