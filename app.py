@@ -2,33 +2,51 @@ from flask import Flask, redirect, request, url_for, flash, get_flashed_messages
 import os
 import requests
 from dotenv import load_dotenv
+import anthropic
 
 load_dotenv()  
 
 app = Flask(__name__, static_folder='static')
 
-CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
-CLAUDE_KEY = os.getenv("CLAUDE_API_KEY")  
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-@app.route("/ask_claude", methods=["POST"])
+
+@app.route('/ask_claude', methods=['POST'])
 def ask_claude():
     data = request.json
-    prompt = data.get("prompt", "")
+    user_prompt = data.get('prompt', '')
     
-    headers = {
-        "x-api-key": CLAUDE_KEY,
-        "anthropic-version": "2023-06-01", 
-        "content-type": "application/json",
-    }
-    body = {
-        "model": "claude-3-haiku-20240307", 
-        "max_tokens": 256,
-        "messages": [{"role": "user", "content": prompt}]
-    }
-    response = requests.post(CLAUDE_API_URL, headers=headers, json=body)
-    return jsonify(response.json())
+    try:
+        message = client.messages.create(
+            model="claude-sonnet-4-5",
+            max_tokens=1000,
+            messages=[
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ],
+            timeout=60.0  # Add 60 second timeout (default is 10s)
+        )
+        
+        response_text = message.content[0].text
+        
+        return jsonify({
+            "success": True,
+            "response": response_text
+        })
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
-@app.route("/")
+
+@app.route("/dream_analysis")
 def dream_analysis(x):
     return x
 
