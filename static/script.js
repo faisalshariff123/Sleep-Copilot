@@ -117,6 +117,9 @@ document.getElementById('enable-sensors').addEventListener('click', enableSensor
 // Dream analysis submission
 async function submitDream() {
             const dream = document.getElementById('dreamInput').value;
+            const resultDiv = document.getElementById('result');  // ← Get the result div
+    
+            resultDiv.textContent = 'Analyzing your dream...';
             
             const response = await fetch('/dream_analysis', {
                 method: 'POST',
@@ -130,9 +133,10 @@ async function submitDream() {
             document.getElementById('result').innerText = data.analysis;
         }
 
-// Sleep tips button
+// Sleep Tips function
 async function getSleepTips() {
-
+    const resultDiv = document.getElementById('sleep-tips-result');
+    
     resultDiv.textContent = 'Getting personalized sleep tip...';
     
     try {
@@ -141,9 +145,10 @@ async function getSleepTips() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({})  
+            body: JSON.stringify({})
         });
         
+        // Get JSON response from Flask
         const data = await response.json();
         
         // Check if successful and display the tip

@@ -23,6 +23,12 @@
         <div id="result"></div>
     </div>
 
+    <div class="section">
+        <h2>Sleep Tips: </h2>
+        <button onclick="getSleepTips()">Get Personalized Tip</button>
+    <div id="sleep-tips-result"></div>
+    </div>
+
     <audio id="whitenoise" src="{{ url_for('static', filename='whitenoise.mp3') }}" loop></audio>
     
     <script src="{{ url_for('static', filename='script.js') }}"></script>

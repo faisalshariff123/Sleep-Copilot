@@ -90,7 +90,7 @@ button:active {
     transform: scale(0.98);
 }
 
-#result, #output {
+#result, #output, #sleep-tips-result {
     margin-top: 20px;
     padding: 15px;
     background-color: rgba(0, 0, 0, 0.6);

@@ -13,6 +13,34 @@ client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 def index():
     return render_template('index.html', ) # maek sure index is in templates folder
 
+@app.route('/sleep_tips', methods=['POST'])
+def sleep_tips():
+    data = request.json
+    # sleep_data = data.get('sleep_data', '')
+    prompt = f"Provide 1 personalized tip to improve sleep quality. Keep each tip under 20 words. Do not use any markdown formatting like # or ** - just plain text."
+    try:
+        message = client.messages.create(
+            model="claude-sonnet-4-5",
+            max_tokens=200,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            timeout=60.0  # Adding a 60 second timeout because wifi sucks
+        )
+        tips = message.content[0].text
+        return jsonify({
+            "success": True,
+            "tips": tips
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 
 @app.route('/ask_claude', methods=['POST'])
 def ask_claude():
