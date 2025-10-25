@@ -1,0 +1,115 @@
+@font-face {
+    font-family: 'Monocraft';
+    src: url('../fonts/Monocraft.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace;
+    max-width: 700px;
+    margin: 50px auto;
+    padding: 20px;
+    background: url('../img/uhhh.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #e5e5e5;
+    min-height: 100vh;
+}
+
+/* HUGE BOLD TITLE */
+.title-ultra-bold {
+    text-align: center;
+    font-size: 4em !important;
+    font-weight: 900 !important;
+    margin-bottom: 1em;
+    color: #fbbf24 !important;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace !important;
+    letter-spacing: 3px;
+    line-height: 1.2;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace !important;
+}
+
+h2 {
+    color: #fbbf24;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border: 2px solid #4a5568;
+    border-radius: 5px;
+    background-color: rgba(30, 30, 30, 0.8);
+    color: #e5e5e5;
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+textarea::placeholder {
+    color: #9ca3af;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #fbbf24;
+}
+
+button {
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #744107;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 5px 10px 0;
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace;
+    transition: background-color 0.3s;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #9d5a0e;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+#result, #output {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+    white-space: pre-wrap;
+    border: 1px solid #4a5568;
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace;
+    min-height: 50px;
+    line-height: 1.6;
+}
+
+.section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    border: 1px solid #4a5568;
+}
+
+input, form, pre {
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace;
+}

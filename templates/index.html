@@ -4,68 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sleep Copilot</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 700px;
-            margin: 50px auto;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        textarea {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px 5px 10px 0;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #result, #output {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            white-space: pre-wrap;
-        }
-        .section {
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+    <h1 class="title-ultra-bold"> SLEEP COPILOT </h1>
+    
     <div class="section">
-        <h1>🌙 Dream Analysis</h1>
+        <h2>Sleep Tracking 😴</h2>
+        <button id="enable-sensors">START TRACKING</button>
+        <div id="output">Waiting for sensor data...</div>
+    </div>
+    
+    <div class="section">
+        <h2>Dream Analysis</h2>
         <textarea id="dreamInput" rows="6" placeholder="Describe your dream in detail..."></textarea>
         <br>
         <button onclick="submitDream()">Analyze Dream</button>
         <div id="result"></div>
     </div>
-    
-    <div class="section">
-        <h1>Sleep Tracking 😴</h1>
-        <button id="enable-sensors">START TRACKING</button>
-        <div id="output">Waiting for sensor data...</div>
-    </div>
 
-    <audio id="whitenoise" src="/static/whitenoise.mp3" loop></audio>
+    <audio id="whitenoise" src="{{ url_for('static', filename='whitenoise.mp3') }}" loop></audio>
     
-    <script src="/static/script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

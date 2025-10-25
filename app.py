@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder='static')
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 @app.route('/')
 def index():
-    return render_template('index.html') # maek sure index is in templates folder
+    return render_template('index.html', ) # maek sure index is in templates folder
 
 
 @app.route('/ask_claude', methods=['POST'])
@@ -57,7 +57,7 @@ def dream_analysis():
             "error": "No dream provided "
         }), 400
     
-    prompt = f"Analyze the following dream: {dream_text}. Provide insights into its possible meanings and symbolism."
+    prompt = f"Analyze the following dream: {dream_text}. Provide insights into its possible meanings and symbolism. Keep it under 30 words."
     
     try:
         message = client.messages.create(
@@ -86,8 +86,12 @@ def dream_analysis():
         }), 500
 
 
-
-
+"""@app.route('/test-static') #debug
+def test_static():
+    import os
+    static_path = os.path.join(app.root_path, 'static')
+    return f"Static folder exists: {os.path.exists(static_path)}<br>Contents: {os.listdir(static_path) if os.path.exists(static_path) else 'N/A'}"
+"""
 
 
 
