@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Input</title>
+</head>
+<body>
+    <h1>Enter Your Dream</h1>
+    <textarea id="dreamInput" rows="6" cols="60" placeholder="Describe your dream in detail..."></textarea>
+    <br>
+
+    <button onclick="submitDream()">Analyze Dream</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function submitDream() {
+            const dream = document.getElementById('dreamInput').value;
+            
+            const response = await fetch('/dream_analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dream: dream })
+            });
+            
+            const data = await response.json();
+            document.getElementById('result').innerText = data.analysis;
+        }
+    </script>
+</body>
+</html>

@@ -29,7 +29,7 @@ def ask_claude():
                     "content": user_prompt
                 }
             ],
-            timeout=60.0  # Add 60 second timeout (default is 10s)
+            timeout=60.0  # Adding a 60 second timeout because wifi sucks
         )
         
         response_text = message.content[0].text
@@ -46,9 +46,44 @@ def ask_claude():
         }), 500
 
 
-@app.route("/dream_analysis")
-def dream_analysis(x):
-    return x
+@app.route("/dream_analysis", methods=['POST'])  # Changed to POST
+def dream_analysis():
+    data = request.json  # Get JSON data from request
+    dream_text = data.get('dream', '')  # Extract dream text
+    
+    if not dream_text:
+        return jsonify({
+            "success": False,
+            "error": "No dream text provided"
+        }), 400
+    
+    prompt = f"Analyze the following dream: {dream_text}. Provide insights into its possible meanings and symbolism."
+    
+    try:
+        message = client.messages.create(
+            model="claude-sonnet-4-5",
+            max_tokens=1000,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            timeout=60.0
+        )
+        
+        analysis = message.content[0].text
+        
+        return jsonify({
+            "success": True,
+            "analysis": analysis
+        })
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 
 
