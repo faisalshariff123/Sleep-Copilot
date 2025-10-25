@@ -3,32 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dream Input</title>
+    <title>Sleep Copilot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result, #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+    </style>
 </head>
 <body>
-    <h1>Enter Your Dream</h1>
-    <textarea id="dreamInput" rows="6" cols="60" placeholder="Describe your dream in detail..."></textarea>
-    <br>
-
-    <button onclick="submitDream()">Analyze Dream</button>
+    <div class="section">
+        <h1>🌙 Dream Analysis</h1>
+        <textarea id="dreamInput" rows="6" placeholder="Describe your dream in detail..."></textarea>
+        <br>
+        <button onclick="submitDream()">Analyze Dream</button>
+        <div id="result"></div>
+    </div>
     
-    <div id="result"></div>
+    <div class="section">
+        <h1>Sleep Tracking 😴</h1>
+        <button id="enable-sensors">START TRACKING</button>
+        <div id="output">Waiting for sensor data...</div>
+    </div>
 
-    <script>
-        async function submitDream() {
-            const dream = document.getElementById('dreamInput').value;
-            
-            const response = await fetch('/dream_analysis', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ dream: dream })
-            });
-            
-            const data = await response.json();
-            document.getElementById('result').innerText = data.analysis;
-        }
-    </script>
+    <audio id="whitenoise" src="/static/whitenoise.mp3" loop></audio>
+    
+    <script src="/static/script.js"></script>
 </body>
 </html>
