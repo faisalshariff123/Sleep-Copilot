@@ -112,3 +112,19 @@ async function enableSensors() {
 }
 
 document.getElementById('enable-sensors').addEventListener('click', enableSensors);
+
+// Dream analysis submission
+async function submitDream() {
+            const dream = document.getElementById('dreamInput').value;
+            
+            const response = await fetch('/dream_analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dream: dream })
+            });
+            
+            const data = await response.json();
+            document.getElementById('result').innerText = data.analysis;
+        }

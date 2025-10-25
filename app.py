@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder='static')
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html') # maek sure index is in templates folder
 
 
 @app.route('/ask_claude', methods=['POST'])
@@ -54,7 +54,7 @@ def dream_analysis():
     if not dream_text:
         return jsonify({
             "success": False,
-            "error": "No dream text provided"
+            "error": "No dream provided "
         }), 400
     
     prompt = f"Analyze the following dream: {dream_text}. Provide insights into its possible meanings and symbolism."
