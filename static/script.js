@@ -37,10 +37,8 @@ function handleMotion(event) {
 
 async function enableSensors() {
   const button = document.getElementById('enable-sensors');
-  const outputDiv = document.getElementById('output');
   const outputContent = document.querySelector('#output .output-content');
   
-  // Disable button during process
   button.disabled = true;
   button.classList.add('loading');
   button.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">INITIALIZING...</span><span class="btn-glitch"></span>';
@@ -49,44 +47,53 @@ async function enableSensors() {
   movementLevels = [];
   monitoring = true;
   
-  // REQUEST MOTION PERMISSION FIRST
-  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+  let motionGranted = false;
+  let micGranted = false;
+  
+  // STEP 1: Request Motion Permission
+  if (outputContent) {
+    outputContent.textContent = 'Requesting motion sensor permission...';
+  }
+  
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
     try {
       const resp = await DeviceMotionEvent.requestPermission();
       if (resp === 'granted') {
         window.addEventListener('devicemotion', handleMotion);
+        motionGranted = true;
+        if (outputContent) {
+          outputContent.textContent = 'Motion sensor granted ✓\nRequesting microphone...';
+        }
       } else {
-        alert('Motion sensor permission denied. Please enable in settings.');
-        resetSensorButton(button);
-        monitoring = false;
-        return;
+        if (outputContent) {
+          outputContent.textContent = 'Motion sensor denied. Continuing with microphone only...';
+        }
       }
     } catch (err) { 
-      alert('Motion error: ' + err); 
-      resetSensorButton(button);
-      monitoring = false;
-      return;
+      console.error('Motion permission error:', err);
+      if (outputContent) {
+        outputContent.textContent = 'Motion sensor unavailable. Continuing with microphone...';
+      }
     }
   } else {
+    // Non-iOS devices or older browsers
     window.addEventListener('devicemotion', handleMotion);
+    motionGranted = true;
+    if (outputContent) {
+      outputContent.textContent = 'Motion sensor enabled ✓\nRequesting microphone...';
+    }
   }
   
-  let audio = document.getElementById('whitenoise');
-  audio.load();
-  
-  try {
-    audio.volume = 0;
-    await audio.play();
-    audio.pause();
-    audio.currentTime = 0;
-    audio.volume = 1;
-  } catch (err) {
-    console.log('Audio unlock attempt:', err);
-  }
-  
-  // Microphone access
+  // STEP 2: Request Microphone Permission
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    micGranted = true;
+    
+    if (outputContent) {
+      outputContent.textContent = 'Microphone granted ✓\nStarting monitoring...';
+    }
+    
+    // Setup audio analysis
     let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let analyser = audioCtx.createAnalyser();
     let dataArray = new Uint8Array(analyser.fftSize);
@@ -104,51 +111,113 @@ async function enableSensors() {
       noiseLevels.push(avg);
     }, 1000);
     
-    button.innerHTML = '<span class="btn-icon">📊</span><span class="btn-text">MONITORING...</span><span class="btn-glitch"></span>';
-    if (outputContent) {
-      outputContent.textContent = 'Monitoring sensors for 5 seconds...';
-    }
   } catch (err) {
-    alert('Microphone permission denied: ' + err);
+    console.error('Microphone error:', err);
+    if (outputContent) {
+      outputContent.textContent = 'Microphone denied. Using motion sensor only...';
+    }
+  }
+  
+  // Check if at least one sensor is available
+  if (!motionGranted && !micGranted) {
+    alert('Both sensors denied. Please enable at least one sensor in your browser settings.');
     resetSensorButton(button);
     monitoring = false;
     return;
+  }
+  
+  // STEP 3: Unlock audio element for iOS
+  let audio = document.getElementById('whitenoise');
+  if (audio) {
+    try {
+      audio.load();
+      audio.volume = 0;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = 1;
+      console.log('Audio unlocked successfully');
+    } catch (err) {
+      console.log('Audio unlock attempt:', err);
+    }
+  }
+  
+  // STEP 4: Start monitoring
+  button.innerHTML = '<span class="btn-icon">📊</span><span class="btn-text">MONITORING...</span><span class="btn-glitch"></span>';
+  if (outputContent) {
+    outputContent.textContent = 'Monitoring for 5 seconds...\n' + 
+      (motionGranted ? '✓ Motion sensor active\n' : '✗ Motion sensor inactive\n') +
+      (micGranted ? '✓ Microphone active' : '✗ Microphone inactive');
   }
   
   // Monitor for 5 seconds
   setTimeout(() => {
     monitoring = false;
     
-    if (noiseLevels.length === 0 || movementLevels.length === 0) {
-      alert('No data collected. Unable to determine sleep state.');
-      resetSensorButton(button);
-      return;
+    // Calculate averages
+    let avgNoise = 0;
+    let avgMovement = 0;
+    let noiseAwake = false;
+    let movementAwake = false;
+    
+    if (noiseLevels.length > 0) {
+      avgNoise = noiseLevels.reduce((a, b) => a + b, 0) / noiseLevels.length;
+      noiseAwake = avgNoise > 1.3;
     }
     
-    let avgNoise = noiseLevels.reduce((a, b) => a + b, 0) / noiseLevels.length;
-    let noiseAwake = avgNoise > 1.2;
-    
-    let avgMovement = movementLevels.reduce((a, b) => a + b, 0) / movementLevels.length;
-    let movementAwake = avgMovement > 9.6;
+    if (movementLevels.length > 0) {
+      avgMovement = movementLevels.reduce((a, b) => a + b, 0) / movementLevels.length;
+      movementAwake = avgMovement > 10;
+    }
     
     console.log(`Avg Noise: ${avgNoise.toFixed(2)}, Avg Movement: ${avgMovement.toFixed(2)}`);
+    console.log(`Noise samples: ${noiseLevels.length}, Movement samples: ${movementLevels.length}`);
     
-    if (noiseAwake || movementAwake) {
-      audio.play().catch(err => {
-        console.error('Audio play failed:', err);
-        alert('Audio play failed. Please tap to play white noise manually.');
-      });
-      if (outputContent) {
-        outputContent.textContent = `Still awake detected!\nNoise: ${avgNoise.toFixed(2)} | Movement: ${avgMovement.toFixed(2)}\n\n🎵 Playing white noise...`;
+    // Determine if user is awake
+    const isAwake = noiseAwake || movementAwake;
+    
+    if (isAwake) {
+      // Play white noise
+      if (audio) {
+        audio.play().then(() => {
+          console.log('White noise playing');
+          if (outputContent) {
+            outputContent.textContent = `Still awake detected! 🎵\n\n` +
+              `Noise: ${avgNoise.toFixed(2)} ${noiseAwake ? '(HIGH)' : '(low)'}\n` +
+              `Movement: ${avgMovement.toFixed(2)} ${movementAwake ? '(HIGH)' : '(low)'}\n\n` +
+              `Playing white noise to help you sleep...`;
+          }
+        }).catch(err => {
+          console.error('Audio play failed:', err);
+          if (outputContent) {
+            outputContent.textContent = `Still awake detected!\n\n` +
+              `Noise: ${avgNoise.toFixed(2)}\n` +
+              `Movement: ${avgMovement.toFixed(2)}\n\n` +
+              `⚠️ Couldn't play audio. Please tap the button below to play manually.`;
+          }
+          // Show manual play button
+          const manualPlayBtn = document.createElement('button');
+          manualPlayBtn.textContent = '🔊 Play White Noise';
+          manualPlayBtn.className = 'btn pixel-btn';
+          manualPlayBtn.style.marginTop = '10px';
+          manualPlayBtn.onclick = () => {
+            audio.play();
+            manualPlayBtn.remove();
+          };
+          document.querySelector('#output').appendChild(manualPlayBtn);
+        });
       }
     } else {
       if (outputContent) {
-        outputContent.textContent = `Sleep detected ✓\nNoise: ${avgNoise.toFixed(2)} | Movement: ${avgMovement.toFixed(2)}`;
+        outputContent.textContent = `Sleep detected ✓\n\n` +
+          `Noise: ${avgNoise.toFixed(2)} (low)\n` +
+          `Movement: ${avgMovement.toFixed(2)} (low)\n\n` +
+          `You seem ready for sleep. Sweet dreams! 😴`;
       }
     }
     
     resetSensorButton(button);
-  }, 5 * 1000);
+  }, 5000);
 }
 
 function resetSensorButton(button) {
@@ -267,4 +336,29 @@ async function generateBedtimeStory() {
         resultDiv.innerHTML = '<div class="output-header">[ ERROR ]</div><div class="output-content">❌❌ ' + error.message + '</div>';
         resultDiv.style.borderColor = '#ef4444';
     }
+}
+
+// White noise toggle for bedtime stories
+function toggleWhiteNoise() {
+    const checkbox = document.getElementById('whitenoise-checkbox');
+    const volumeSlider = document.getElementById('whitenoise-volume');
+    const audio = document.getElementById('whitenoise');
+    
+    if (checkbox.checked) {
+        volumeSlider.disabled = false;
+        audio.volume = volumeSlider.value / 100;
+        audio.play();
+    } else {
+        volumeSlider.disabled = true;
+        audio.pause();
+    }
+}
+
+function updateWhiteNoiseVolume() {
+    const volumeSlider = document.getElementById('whitenoise-volume');
+    const audio = document.getElementById('whitenoise');
+    const volumeDisplay = document.getElementById('volume-display');
+    
+    audio.volume = volumeSlider.value / 100;
+    volumeDisplay.textContent = volumeSlider.value + '%';
 }
