@@ -1,8 +1,9 @@
 from flask import Flask, redirect, request, url_for, flash, get_flashed_messages, render_template, jsonify
 import os
-#import requests
+import requests
 from dotenv import load_dotenv
 import anthropic
+import base64
 # from fish_audio_sdk import Session, TTSRequest
 
 load_dotenv()  
@@ -26,67 +27,86 @@ def generate_bedtime_story():
     Keep it under 250 words. Plain text only, no markdown."""
 
     try:
+        # Step 1: Generate story with Claude
         message = client.messages.create(
             model="claude-sonnet-4-5",
             max_tokens=500,
-            messages=[
-                {
-                    "role": "user",
-                    "content": story_prompt
-                }
-            ],
-            timeout=60.0  # Adding a 60 second timeout because wifi sucks
-        )
-        story_text = message.content[0].text
-        fish_response = requests.post(
-            'https://api.fish.audio/v1/tts',
-            headers={
-                'Authorization': f'Bearer {FISH_KEY}',
-                'Content-Type': 'application/json'
-            },
-            json={
-                'text': story_text,
-                #'reference_id': 'x', 
-                'format': 'mp3',
-                'normalize': True,
-                'latency': 'normal'
-            },
-            timeout=30.0
+            messages=[{"role": "user", "content": story_prompt}],
+            timeout=60.0
         )
         
-        if fish_response.status_code == 200:
-            audio_data = fish_response.json()
+        story_text = message.content[0].text
+        print(f"✅ Story generated")
+        
+        # Step 2: Call Fish Audio REST API
+        try:
+            fish_response = requests.post(
+                'https://api.fish.audio/v1/tts',
+                headers={
+                    'Authorization': f'Bearer {FISH_KEY}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'text': story_text,
+                    'format': 'mp3'
+                },
+                timeout=30.0
+            )
             
-            audio_url = (audio_data.get('audio') or 
-                        audio_data.get('url') or 
-                        audio_data.get('audio_url') or
-                        audio_data.get('file'))
+            print(f"🐟 Fish Response Status: {fish_response.status_code}")
+            print(f"🐟 Fish Response Headers: {dict(fish_response.headers)}")
             
-            if audio_url:
-                return jsonify({
-                    "success": True,
-                    "story": story_text,
-                    "audio_url": audio_url
-                })
+            if fish_response.status_code == 200:
+                # Check if response is JSON or binary audio
+                content_type = fish_response.headers.get('Content-Type', '')
+                
+                if 'application/json' in content_type:
+                    # Response is JSON with URL
+                    audio_data = fish_response.json()
+                    audio_url = audio_data.get('audio') or audio_data.get('url')
+                    print(f"✅ Got audio URL: {audio_url}")
+                    
+                    return jsonify({
+                        "success": True,
+                        "story": story_text,
+                        "audio_url": audio_url
+                    })
+                elif 'audio' in content_type:
+                    # Response is direct audio binary
+                    # Save to static folder
+                    import uuid
+                    filename = f"story_{uuid.uuid4().hex[:8]}.mp3"
+                    filepath = os.path.join('static', filename)
+                    
+                    with open(filepath, 'wb') as f:
+                        f.write(fish_response.content)
+                    
+                    print(f"✅ Audio saved to {filename}")
+                    
+                    return jsonify({
+                        "success": True,
+                        "story": story_text,
+                        "audio_url": f"/static/{filename}"
+                    })
+                else:
+                    print(f"❌ Unknown content type: {content_type}")
+                    print(f"Response preview: {fish_response.text[:200]}")
             else:
-                # Return story without audio if Fish fails
-                return jsonify({
-                    "success": True,
-                    "story": story_text,
-                    "audio_url": None,
-                    "message": "Story generated, but audio generation failed. You can still read the story!"
-                })
-        else:
-            # Return story even if Fish Audio fails
-            return jsonify({
-                "success": True,
-                "story": story_text,
-                "audio_url": None,
-                "message": f"Story generated! (Audio generation failed: {fish_response.status_code})"
-            })
+                print(f"❌ Fish API error: {fish_response.text}")
+                
+        except Exception as fish_error:
+            print(f"❌ Fish Audio error: {fish_error}")
+        
+        # Return story without audio if Fish fails
+        return jsonify({
+            "success": True,
+            "story": story_text,
+            "audio_url": None,
+            "message": "Story generated! (Audio feature temporarily unavailable)"
+        })
             
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"💥 ERROR: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)
@@ -206,5 +226,6 @@ def test_static():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    """port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)"""
+    app.run(debug=True)
