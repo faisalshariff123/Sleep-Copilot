@@ -40,7 +40,6 @@ async function enableSensors() {
   const outputDiv = document.getElementById('output');
   const outputContent = document.querySelector('#output .output-content');
   
-  // Disable button during process
   button.disabled = true;
   button.classList.add('loading');
   button.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">INITIALIZING...</span><span class="btn-glitch"></span>';
@@ -49,44 +48,56 @@ async function enableSensors() {
   movementLevels = [];
   monitoring = true;
   
+  let motionEnabled = false;
+  let micEnabled = false;
+  
   // REQUEST MOTION PERMISSION FIRST
   if (typeof DeviceMotionEvent.requestPermission === 'function') {
     try {
       const resp = await DeviceMotionEvent.requestPermission();
       if (resp === 'granted') {
         window.addEventListener('devicemotion', handleMotion);
+        motionEnabled = true;
+        console.log('✅ Motion enabled');
       } else {
-        alert('Motion sensor permission denied. Please enable in settings.');
-        resetSensorButton(button);
-        monitoring = false;
-        return;
+        console.log('❌ Motion denied');
       }
     } catch (err) { 
-      alert('Motion error: ' + err); 
-      resetSensorButton(button);
-      monitoring = false;
-      return;
+      console.log('Motion error:', err);
     }
   } else {
+    // Desktop - motion may not be available, that's okay
     window.addEventListener('devicemotion', handleMotion);
+    motionEnabled = true;
   }
   
+  // Audio setup
   let audio = document.getElementById('whitenoise');
-  audio.load();
-  
-  try {
-    audio.volume = 0;
-    await audio.play();
-    audio.pause();
-    audio.currentTime = 0;
-    audio.volume = 1;
-  } catch (err) {
-    console.log('Audio unlock attempt:', err);
+  if (audio) {
+    audio.load();
+    try {
+      audio.volume = 0;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = 1;
+    } catch (err) {
+      console.log('Audio unlock attempt:', err);
+    }
   }
   
-  // Microphone access
+  // Microphone access - WITH TIMEOUT
+  button.innerHTML = '<span class="btn-icon">🎤</span><span class="btn-text">REQUESTING MIC...</span><span class="btn-glitch"></span>';
+  
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Add 5 second timeout for mic request
+    const micPromise = navigator.mediaDevices.getUserMedia({ audio: true });
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), 5000)
+    );
+    
+    const stream = await Promise.race([micPromise, timeoutPromise]);
+    
     let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let analyser = audioCtx.createAnalyser();
     let dataArray = new Uint8Array(analyser.fftSize);
@@ -104,40 +115,65 @@ async function enableSensors() {
       noiseLevels.push(avg);
     }, 1000);
     
-    button.innerHTML = '<span class="btn-icon">📊</span><span class="btn-text">MONITORING...</span><span class="btn-glitch"></span>';
-    if (outputContent) {
-      outputContent.textContent = 'Monitoring sensors for 5 seconds...';
-    }
+    micEnabled = true;
+    console.log('✅ Microphone enabled');
   } catch (err) {
-    alert('Microphone permission denied: ' + err);
+    console.log('⚠️ Microphone unavailable:', err.message);
+    // Continue without microphone - use only motion data
+  }
+  
+  // Check if at least ONE sensor is enabled
+  if (!motionEnabled && !micEnabled) {
+    alert('No sensors available. Please enable motion or microphone permissions.');
     resetSensorButton(button);
     monitoring = false;
     return;
+  }
+  
+  button.innerHTML = '<span class="btn-icon">📊</span><span class="btn-text">MONITORING...</span><span class="btn-glitch"></span>';
+  if (outputContent) {
+    const sensors = [];
+    if (motionEnabled) sensors.push('Motion');
+    if (micEnabled) sensors.push('Microphone');
+    outputContent.textContent = `Monitoring ${sensors.join(' + ')} for 5 seconds...`;
   }
   
   // Monitor for 5 seconds
   setTimeout(() => {
     monitoring = false;
     
-    if (noiseLevels.length === 0 || movementLevels.length === 0) {
-      alert('No data collected. Unable to determine sleep state.');
-      resetSensorButton(button);
-      return;
-    }
-    
-    let avgNoise = noiseLevels.reduce((a, b) => a + b, 0) / noiseLevels.length;
-    let noiseAwake = avgNoise > 2;
-    
-    let avgMovement = movementLevels.reduce((a, b) => a + b, 0) / movementLevels.length;
-    let movementAwake = avgMovement > 10;
+    // Calculate averages (use 0 if no data)
+    let avgNoise = noiseLevels.length > 0 
+      ? noiseLevels.reduce((a, b) => a + b, 0) / noiseLevels.length 
+      : 0;
+    let avgMovement = movementLevels.length > 0 
+      ? movementLevels.reduce((a, b) => a + b, 0) / movementLevels.length 
+      : 0;
     
     console.log(`Avg Noise: ${avgNoise.toFixed(2)}, Avg Movement: ${avgMovement.toFixed(2)}`);
     
-    if (noiseAwake || movementAwake) {
-      audio.play().catch(err => {
-        console.error('Audio play failed:', err);
-        alert('Audio play failed. Please tap to play white noise manually.');
-      });
+    // Determine if awake (relaxed thresholds)
+    let noiseAwake = avgNoise > 2;
+    let movementAwake = avgMovement > 10;
+    
+    // If only one sensor is available, use that
+    let isAwake;
+    if (micEnabled && motionEnabled) {
+      isAwake = noiseAwake || movementAwake;
+    } else if (micEnabled) {
+      isAwake = noiseAwake;
+    } else if (motionEnabled) {
+      isAwake = movementAwake;
+    } else {
+      isAwake = false; // Shouldn't happen
+    }
+    
+    if (isAwake) {
+      if (audio) {
+        audio.play().catch(err => {
+          console.error('Audio play failed:', err);
+        });
+      }
       if (outputContent) {
         outputContent.textContent = `Still awake detected!\nNoise: ${avgNoise.toFixed(2)} | Movement: ${avgMovement.toFixed(2)}\n\n🎵 Playing white noise...`;
       }
@@ -150,7 +186,6 @@ async function enableSensors() {
     resetSensorButton(button);
   }, 5 * 1000);
 }
-
 function resetSensorButton(button) {
   button.disabled = false;
   button.classList.remove('loading');
