@@ -24,10 +24,9 @@ def generate_bedtime_story():
     Make it soothing, gentle, and perfect for falling asleep to. 
     Use slow pacing, peaceful imagery, and a tranquil tone.
     End with a peaceful resolution that encourages sleep.
-    Keep it under 250 words. Plain text only, no markdown."""
+    Keep it under 250 words. Plain text only, no markdown and no story name at top."""
 
     try:
-        # Step 1: Generate story with Claude
         message = client.messages.create(
             model="claude-sonnet-4-5",
             max_tokens=500,
@@ -38,7 +37,7 @@ def generate_bedtime_story():
         story_text = message.content[0].text
         print(f"✅ Story generated")
         
-        # Step 2: Call Fish Audio REST API
+        # Fish Audio REST API
         try:
             fish_response = requests.post(
                 'https://api.fish.audio/v1/tts',
@@ -48,7 +47,9 @@ def generate_bedtime_story():
                 },
                 json={
                     'text': story_text,
-                    'format': 'mp3'
+                    'voice': 'samantha',
+                    'format': 'mp3',
+                    'emotion' : 'calm'
                 },
                 timeout=30.0
             )
@@ -57,7 +58,7 @@ def generate_bedtime_story():
             print(f"🐟 Fish Response Headers: {dict(fish_response.headers)}")
             
             if fish_response.status_code == 200:
-                # Check if response is JSON or binary audio
+                # Check if rresponse is JSON or binary audio
                 content_type = fish_response.headers.get('Content-Type', '')
                 
                 if 'application/json' in content_type:
@@ -226,6 +227,5 @@ def test_static():
 
 
 if __name__ == "__main__":
-    """port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)"""
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
