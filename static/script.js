@@ -37,10 +37,8 @@ function handleMotion(event) {
 
 async function enableSensors() {
   const button = document.getElementById('enable-sensors');
-  const outputDiv = document.getElementById('output');
   const outputContent = document.querySelector('#output .output-content');
   
-  // Disable button during process
   button.disabled = true;
   button.classList.add('loading');
   button.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">INITIALIZING...</span><span class="btn-glitch"></span>';
@@ -48,29 +46,37 @@ async function enableSensors() {
   noiseLevels = [];
   movementLevels = [];
   monitoring = true;
+  // DEBUGGING
+  //let motionGranted = false;
+  //let micGranted = false;
   
-  // REQUEST MOTION PERMISSION FIRST
-  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+  // STEP 1: Request Motion Permission
+  if (outputContent) {
+    outputContent.textContent = 'Requesting motion sensor permission...';
+  }
+  
+  if (typeof DeviceMotionEvent.requestPermission === 'function')
     try {
       const resp = await DeviceMotionEvent.requestPermission();
       if (resp === 'granted') {
         window.addEventListener('devicemotion', handleMotion);
-      } else {
+        //motionGranted = true;
+        } else {
         alert('Motion sensor permission denied. Please enable in settings.');
         resetSensorButton(button);
         monitoring = false;
         return;
       }
+    
     } catch (err) { 
-      alert('Motion error: ' + err); 
+      console.error('Motion permission error:', err);
       resetSensorButton(button);
       monitoring = false;
       return;
     }
-  } else {
+   else {
     window.addEventListener('devicemotion', handleMotion);
   }
-  
   let audio = document.getElementById('whitenoise');
   audio.load();
   
@@ -267,4 +273,29 @@ async function generateBedtimeStory() {
         resultDiv.innerHTML = '<div class="output-header">[ ERROR ]</div><div class="output-content">❌❌ ' + error.message + '</div>';
         resultDiv.style.borderColor = '#ef4444';
     }
+}
+
+// White noise toggle for bedtime stories
+function toggleWhiteNoise() {
+    const checkbox = document.getElementById('whitenoise-checkbox');
+    const volumeSlider = document.getElementById('whitenoise-volume');
+    const audio = document.getElementById('whitenoise');
+    
+    if (checkbox.checked) {
+        volumeSlider.disabled = false;
+        audio.volume = volumeSlider.value / 100;
+        audio.play();
+    } else {
+        volumeSlider.disabled = true;
+        audio.pause();
+    }
+}
+
+function updateWhiteNoiseVolume() {
+    const volumeSlider = document.getElementById('whitenoise-volume');
+    const audio = document.getElementById('whitenoise');
+    const volumeDisplay = document.getElementById('volume-display');
+    
+    audio.volume = volumeSlider.value / 100;
+    volumeDisplay.textContent = volumeSlider.value + '%';
 }
