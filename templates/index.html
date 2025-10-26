@@ -2,31 +2,106 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sleep Copilot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h1 class="title-ultra-bold"> SLEEP COPILOT </h1>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
     
-    <div class="section">
-        <h2>Sleep Tracking 😴</h2>
-        <button id="enable-sensors">START TRACKING</button>
-        <div id="output">Waiting for sensor data...</div>
-    </div>
-    
-    <div class="section">
-        <h2>Dream Analysis</h2>
-        <textarea id="dreamInput" rows="6" placeholder="Describe your dream in detail..."></textarea>
-        <br>
-        <button onclick="submitDream()">Analyze Dream</button>
-        <div id="result"></div>
-    </div>
+    <div class="container">
+        <header>
+            <div class="pixel-border-top"></div>
+            <h1 class="title-ultra-bold glitch" data-text="SLEEP COPILOT">SLEEP<br>COPILOT</h1>
+            <p class="subtitle blink">[ Your Retro AI-Powered Sleep Assistant ]</p>
+            <div class="pixel-border-bottom"></div>
+        </header>
+        
+        <main>
+            <section class="card pixel-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                
+                <div class="card-header">
+                    <span class="icon pixel-icon">😴</span>
+                    <h2>[ SLEEP TRACKING ]</h2>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="card-body">
+                    <p class="description">» Monitor your sleep patterns using device sensors</p>
+                    <button id="enable-sensors" class="btn btn-primary pixel-btn">
+                        <span class="btn-icon">▶</span>
+                        <span class="btn-text">START TRACKING</span>
+                        <span class="btn-glitch"></span>
+                    </button>
+                    <div id="output" class="sensor-output pixel-box">
+                        <div class="output-header">[ SENSOR DATA ]</div>
+                        <div class="output-content">Waiting for sensor data...</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="card pixel-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                
+                <div class="card-header">
+                    <span class="icon pixel-icon">🌙</span>
+                    <h2>[ DREAM ANALYSIS ]</h2>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="card-body">
+                    <p class="description">» Let AI interpret the meaning behind your dreams</p>
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="dreamInput" 
+                            rows="6" 
+                            placeholder="> Enter your dream description..."
+                            maxlength="1000"
+                            class="pixel-input"
+                        ></textarea>
+                        <div class="char-counter">
+                            <span id="char-count">0</span>/1000
+                        </div>
+                    </div>
+                    <button onclick="submitDream()" class="btn btn-primary pixel-btn">
+                        <span class="btn-icon">✨</span>
+                        <span class="btn-text">ANALYZE DREAM</span>
+                        <span class="btn-glitch"></span>
+                    </button>
+                    <div id="result" class="result-box pixel-box"></div>
+                </div>
+            </section>
 
-    <div class="section">
-        <h2>Sleep Tips: </h2>
-        <button onclick="getSleepTips()">Get Personalized Tip</button>
-    <div id="sleep-tips-result"></div>
+            <section class="card pixel-card">
+                <div class="card-corner tl"></div>
+                <div class="card-corner tr"></div>
+                <div class="card-corner bl"></div>
+                <div class="card-corner br"></div>
+                
+                <div class="card-header">
+                    <span class="icon pixel-icon">💡</span>
+                    <h2>[ SLEEP TIPS ]</h2>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="card-body">
+                    <p class="description">» Get personalized advice for better sleep</p>
+                    <button onclick="getSleepTips()" class="btn btn-primary pixel-btn">
+                        <span class="btn-icon">💭</span>
+                        <span class="btn-text">GET TIP</span>
+                        <span class="btn-glitch"></span>
+                    </button>
+                    <div id="sleep-tips-result" class="result-box pixel-box"></div>
+                </div>
+            </section>
+        </main>
+
+        
     </div>
 
     <audio id="whitenoise" src="{{ url_for('static', filename='whitenoise.mp3') }}" loop></audio>

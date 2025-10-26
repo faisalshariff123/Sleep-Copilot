@@ -209,3 +209,5 @@ __marimo__/
 # Claude API
 
 .env
+package-lock.json
+AI_RULES.md
