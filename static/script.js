@@ -228,13 +228,12 @@ async function getSleepTips() {
     }
 }
 
-// bedtime story 
+// Bedtime story 
 async function generateBedtimeStory() {
     const theme = document.getElementById('story-theme').value.trim() || 'peaceful night sky';
     const resultDiv = document.getElementById('story-result');
     const audioPlayer = document.getElementById('story-audio');
-    const whiteNoiseSection = document.getElementById('whitenoise-toggle');
-    
+
     resultDiv.innerHTML = '<div class="output-header">[ GENERATING STORY ]</div><div class="output-content">🪄 Creating your bedtime story...</div>';
     resultDiv.style.borderColor = '#4a5568';
     audioPlayer.style.display = 'none';
@@ -256,7 +255,6 @@ async function generateBedtimeStory() {
             if (data.audio_url) {
                 audioPlayer.src = data.audio_url;
                 audioPlayer.style.display = 'block';
-                whiteNoiseSection.style.display = 'block';
             } else {
                 resultDiv.innerHTML += '<div class="output-content">🎧 Audio unavailable, read it yourself for now!</div>';
             }
