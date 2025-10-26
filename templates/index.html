@@ -102,76 +102,82 @@
                     <div id="sleep-tips-result" class="result-box pixel-box"></div>
                 </div>
             </section>
-            
-            <!-- AI Bedtimestories card -->
-            <section class="card pixel-card">
-                <div class="card-corner tl"></div>
-                <div class="card-corner tr"></div>
-                <div class="card-corner bl"></div>
-                <div class="card-corner br"></div>
-                
-                <div class="card-header">
-                    <span class="icon pixel-icon">📖</span>
-                    <h2>[ AI BEDTIME STORIES ]</h2>
-                    <div class="status-indicator"></div>
-                </div>
-                <div class="card-body">
-                    <p class="description">» Let Claude AI & Fish Audio create and narrate a personalized bedtime story for you</p>
-                    <div class="input-wrapper" style="margin-bottom: 15px;">
-                        <label for="story-theme" style="display: block; margin-bottom: 5px; color: #fbbf24;">
-                            Story Theme:
-                        </label>
-                        <input 
-                            type="text" 
-                            id="story-theme" 
-                            class="pixel-input"
-                            placeholder="e.g., a peaceful forest, starry night, cozy cabin..."
-                            style="width: 100%;"
-                        />
-                    </div>
-                    <button id="generate-story-btn" onclick="generateBedtimeStory()" class="btn btn-primary pixel-btn">
-                        <span class="btn-icon">🎙️</span>
-                        <span class="btn-text">GENERATE BEDTIME STORY</span>
-                        <span class="btn-glitch"></span>
-                    </button>
-                   <!-- <div id="whitenoise-toggle" style="display: none; margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.4); border-radius: 8px; border: 1px solid #4a5568;">
-                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <input 
-                                type="checkbox" 
-                                id="whitenoise-checkbox" 
-                                onchange="toggleWhiteNoise()"
-                                style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;"
-                            />
-                            <label for="whitenoise-checkbox" style="color: #fbbf24; cursor: pointer;">
-                                🌊 Play White Noise in Background
-                            </label>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <label style="color: #9ca3af; font-size: 0.9em;">Volume:</label>
-                            <input 
-                                type="range" 
-                                id="whitenoise-volume" 
-                                min="0" 
-                                max="100" 
-                                value="20" 
-                                disabled
-                                oninput="updateWhiteNoiseVolume()"
-                                style="flex: 1;"
-                            />
-                            <span id="volume-display" style="color: #9ca3af; font-size: 0.9em; min-width: 35px;">20%</span>
-                        </div>
-                    </div>-->
-                    <div id="story-result" class="result-box pixel-box"></div>
-                    <audio 
-                        id="story-audio" 
-                        controls 
-                        style="width: 100%; margin-top: 15px; display: none; border-radius: 5px;"
-                    ></audio>
-                    <p style="color: #6b7280; font-size: 0.85em; margin-top: 10px; font-style: italic;">
-                        💡 Tip: Use headphones for the best experience. The story will be narrated while white noise plays softly in the background.
-                    </p>
-                </div>
-            </section>
+            <div class="section">
+    <h2>📖 AI Bedtime Stories</h2>
+    <p style="color: #9ca3af; margin-bottom: 15px; font-size: 0.95em;">
+        Let AI create and narrate a personalized bedtime story just for you. 
+        Powered by Claude AI + Fish Audio.
+    </p>
+    
+    <!-- Story theme input -->
+    <div style="margin-bottom: 15px;">
+        <label for="story-theme" style="display: block; margin-bottom: 5px; color: #fbbf24;">
+            Story Theme:
+        </label>
+        <input 
+            type="text" 
+            id="story-theme" 
+            placeholder="e.g., a peaceful forest, starry night, cozy cabin..."
+            style="width: 100%; padding: 10px; background: rgba(30, 30, 30, 0.8); border: 2px solid #4a5568; border-radius: 5px; color: #e5e5e5; font-family: 'Monocraft', monospace;"
+        />
+    </div>
+    
+    <!-- Generate button -->
+    <button id="generate-story-btn" onclick="generateBedtimeStory()">
+        🎙️ Generate Bedtime Story
+    </button>
+    
+    <!-- White noise controls (hidden until story is generated) -->
+    <div id="whitenoise-toggle" style="display: none; margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.4); border-radius: 8px; border: 1px solid #4a5568;">
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <input 
+                type="checkbox" 
+                id="whitenoise-checkbox" 
+                onchange="toggleWhiteNoise()"
+                style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;"
+            />
+            <label for="whitenoise-checkbox" style="color: #fbbf24; cursor: pointer;">
+                🌊 Play White Noise in Background
+            </label>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="color: #9ca3af; font-size: 0.9em;">Volume:</label>
+            <input 
+                type="range" 
+                id="whitenoise-volume" 
+                min="0" 
+                max="100" 
+                value="20" 
+                disabled
+                oninput="updateWhiteNoiseVolume()"
+                style="flex: 1;"
+            />
+            <span id="volume-display" style="color: #9ca3af; font-size: 0.9em; min-width: 35px;">20%</span>
+        </div>
+    </div>
+    
+    <!-- Story result display -->
+    <div id="story-result"></div>
+    
+    <!-- Audio player -->
+    <audio 
+        id="story-audio" 
+        controls 
+        style="width: 100%; margin-top: 15px; display: none; border-radius: 5px;"
+    ></audio>
+    
+    <p style="color: #6b7280; font-size: 0.85em; margin-top: 10px; font-style: italic;">
+        💡 Tip: Use headphones for the best experience. The story will be narrated while white noise plays softly in the background.
+    </p>
+</div>
+
+<script>
+// Update volume display
+document.getElementById('whitenoise-volume').addEventListener('input', function() {
+    document.getElementById('volume-display').textContent = this.value + '%';
+});
+</script>
         </main>
     </div>
     <audio id="whitenoise" src="{{ url_for('static', filename='whitenoise.mp3') }}" loop></audio>
