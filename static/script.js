@@ -142,19 +142,17 @@ async function enableSensors() {
   setTimeout(() => {
     monitoring = false;
     
-    // Calculate averages (use 0 if no data)
-    let avgNoise = noiseLevels.length > 0 
-      ? noiseLevels.reduce((a, b) => a + b, 0) / noiseLevels.length 
-      : 0;
-    let avgMovement = movementLevels.length > 0 
-      ? movementLevels.reduce((a, b) => a + b, 0) / movementLevels.length 
-      : 0;
+    // im losing my mind
+    let avgNoise = noiseLevels.reduce((a, b) => a + b, 0) / noiseLevels.length;
+    let noiseAwake = avgNoise > 2;
+    
+    let avgMovement = movementLevels.reduce((a, b) => a + b, 0) / movementLevels.length;
+    let movementAwake = avgMovement > 10;
     
     console.log(`Avg Noise: ${avgNoise.toFixed(2)}, Avg Movement: ${avgMovement.toFixed(2)}`);
     
     // Determine if awake (relaxed thresholds)
-    let noiseAwake = avgNoise > 2;
-    let movementAwake = avgMovement > 10;
+    
     
     // If only one sensor is available, use that
     let isAwake;
