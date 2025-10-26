@@ -563,17 +563,102 @@ footer {
     }
 }
 
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+input[type="text"] {
+    font-family: 'Monocraft', 'Fira Mono', 'Consolas', monospace;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+}
+
+audio {
+    filter: invert(1) hue-rotate(180deg);
+    opacity: 0.9;
+}
+
+audio::-webkit-media-controls-panel {
+    background-color: rgba(30, 30, 30, 0.9);
+}
+
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(74, 85, 104, 0.5);
+    outline: none;
+    border-radius: 5px;
+    height: 6px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #fbbf24;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #f59e0b;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #fbbf24;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+    transition: background 0.3s;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: #f59e0b;
+}
+
+input[type="range"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+
+input[type="checkbox"] {
+    accent-color: #fbbf24;
+}
+
+
+#story-result .output-content {
+    line-height: 1.8;
+    font-size: 1.05em;
+    text-align: justify;
+}
+
+
+#story-audio,
+#whitenoise-toggle {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
     }
-    
-    .scanlines {
-        display: none;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
+
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
