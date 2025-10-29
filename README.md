@@ -21,7 +21,7 @@ https://sleep-copilot.onrender.com
 
 1. **Clone the repo:**
     ```
-    git clone https://github.com/YOUR_USERNAME/sleep-copilot.git
+    git clone https://github.com/faisalshariff123/sleep-copilot.git
     cd sleep-copilot
     ```
 
