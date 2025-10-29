@@ -4,7 +4,7 @@
 https://sleep-copilot.onrender.com
 ## Features
 
-- **Sleep Tracking:** Monitor your sleep using device microphone and motion sensors.
+- **Sleep Tracking:** Monitor your sleep using device microphone and motion sensors and plays calming white noise to help you sleep better.
 - **Dream Analysis:** Get instant AI-powered interpretations of your dreams.
 - **Sleep Tips:** Receive concise personalized advice for better sleep.
 - **AI Bedtime Stories:** Generate calming bedtime stories, optionally with synthesized narration.
