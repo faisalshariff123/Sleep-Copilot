@@ -121,7 +121,7 @@ async function enableSensors() {
     return;
   }
   
-  // Monitor for 5 seconds
+  // Monitor for half hr
   setTimeout(() => {
     monitoring = false;
     
@@ -154,7 +154,7 @@ async function enableSensors() {
     }
     
     resetSensorButton(button);
-  }, 5 * 1000);
+  }, 30 * 60 * 1000);
 }
 
 function resetSensorButton(button) {
