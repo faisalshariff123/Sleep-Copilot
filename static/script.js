@@ -112,7 +112,7 @@ async function enableSensors() {
     
     button.innerHTML = '<span class="btn-icon">📊</span><span class="btn-text">MONITORING...</span><span class="btn-glitch"></span>';
     if (outputContent) {
-      outputContent.textContent = 'Monitoring sensors for 5 seconds...';
+      outputContent.textContent = 'Monitoring sensors for 30 minutes...';
     }
   } catch (err) {
     alert('Microphone permission denied: ' + err);
