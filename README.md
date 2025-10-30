@@ -1,7 +1,6 @@
 # Sleep Copilot
 
-**Sleep Copilot** is a retro-themed AI-powered sleep assistant web application. It tracks sleep patterns (using device sensors), analyzes dreams, offers personalized sleep tips, and generates narrated bedtime stories using Claude AI and Fish Audio.
-https://sleep-copilot.onrender.com
+**Sleep Copilot**[https://sleep-copilot.onrender.com] is a retro-themed AI-powered sleep assistant web application. It tracks sleep patterns (using device sensors) and decides whether to play calming white noise or not, analyzes dreams, offers personalized sleep tips, and generates narrated bedtime stories using Claude AI and Fish Audio.
 ## Features
 
 - **Sleep Tracking:** Monitor your sleep using device microphone and motion sensors and plays calming white noise to help you sleep better.
